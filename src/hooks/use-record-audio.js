@@ -20,14 +20,16 @@ const useRecordAudio = ({
     let intervalRef = useRef(null);
 
     useEffect(() => {
-        intervalRef.current = setInterval(() => {
-            setSeconds((seconds) => seconds + 1);
-        }, 1000);
+        if(mediaRecorder?.state === 'recording'){
+            intervalRef.current = setInterval(() => {
+                setSeconds((seconds) => seconds + 1);
+            }, 1000);
+        }
 
         return () => {
             clearInterval(intervalRef.current);
         }
-    }, [mediaRecorder]);
+    }, [mediaRecorder?.state]);
 
     const startRecording = useCallback(() => {
         if (mediaRecorder) {
@@ -97,7 +99,7 @@ const useRecordAudio = ({
 
     useEffect(() => {
         if (mediaRecorder) {
-            mediaRecorder.addEventListener("stop", (event) => {
+            mediaRecorder.addEventListener("stop", () => {
                 setState(mediaRecorder?.state);
                 const blob = new Blob(chunks, {type: "audio/wav"});
                 const audioURL = URL.createObjectURL(blob);

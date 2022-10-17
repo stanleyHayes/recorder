@@ -3,21 +3,17 @@ import {
     Alert,
     AlertTitle,
     Box,
-    Button,
-    Card,
-    CardContent,
+    Button, Card, CardContent,
     CardMedia,
     ClickAwayListener,
-    Container,
-    Divider,
+    Container, Divider,
     LinearProgress,
-    Stack,
-    Typography
+    Stack, Typography
 } from "@mui/material";
 import useRecordAudio from "./hooks/use-record-audio";
 import useTextSelection from "./hooks/use-text-selection";
 import useRewrite from "./hooks/use-rewrite";
-import {Fragment, useEffect, useState} from "react";
+import {useEffect, useState, Fragment} from "react";
 
 function App() {
 
@@ -62,6 +58,10 @@ function App() {
         return `<span style={{backgroundColor: "blue", color: "white", borderRadius: 2, padding: 4, fontSize: 50, fontWeight: "bold"}}>${word}</span>`;
     }
 
+    const formatTime = seconds => {
+        return seconds < 10 ? `0${seconds}` : seconds;
+    }
+
     return (
         <Box>
             {connecting && <LinearProgress variant="query" color="secondary"/>}
@@ -84,7 +84,10 @@ function App() {
                         <CardMedia controls={!!src} component="audio" src={src}/>
                     )}
 
-                    <Button>{seconds}</Button>
+
+                    <Button>{formatTime(parseInt(`${seconds / 60}`))} :
+                        {formatTime(parseInt(`${seconds % 60}`))}
+                    </Button>
 
                     <Stack direction="column" spacing={2} alignItems="center">
                         {state === "inactive" ? (
