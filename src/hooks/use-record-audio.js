@@ -66,9 +66,9 @@ const useRecordAudio = ({
             setState(mediaRecorder?.state);
         }
         if (onStopRecording) {
-            onStopRecording();
+            onStopRecording(seconds);
         }
-    }, [mediaRecorder, onStopRecording]);
+    }, [mediaRecorder, onStopRecording, seconds]);
 
     useEffect(() => {
         if (!navigator.mediaDevices) {
@@ -104,7 +104,11 @@ const useRecordAudio = ({
                 const blob = new Blob(chunks, {type: "audio/wav"});
                 const audioURL = URL.createObjectURL(blob);
                 setSrc(audioURL);
-                setAudio(blob)
+                setAudio(blob);
+                if(onStopRecording){
+                    onStopRecording(seconds);
+                    setSeconds(0);
+                }
             });
         }
         if (mediaRecorder) {
@@ -114,7 +118,7 @@ const useRecordAudio = ({
                 });
             }
         }
-    }, [chunks, mediaRecorder]);
+    }, [chunks, mediaRecorder, onStopRecording, seconds]);
 
     useEffect(() => {
         if (mediaRecorder) {

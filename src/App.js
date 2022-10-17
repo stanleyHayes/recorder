@@ -3,19 +3,29 @@ import {
     Alert,
     AlertTitle,
     Box,
-    Button, Card, CardContent,
+    Button,
+    Card,
+    CardContent,
     CardMedia,
     ClickAwayListener,
-    Container, Divider,
+    Container,
+    Divider,
     LinearProgress,
-    Stack, Typography
+    Stack,
+    Typography
 } from "@mui/material";
 import useRecordAudio from "./hooks/use-record-audio";
 import useTextSelection from "./hooks/use-text-selection";
 import useRewrite from "./hooks/use-rewrite";
-import {useEffect, useState, Fragment} from "react";
+import {Fragment, useEffect, useState} from "react";
+import AudioProgress from "./components/audio-progress";
 
 function App() {
+
+    const [totalSeconds, setTotalSeconds] = useState(0);
+    const onStopRecording = seconds => {
+        setTotalSeconds(seconds);
+    }
 
     const {
         connecting,
@@ -25,17 +35,19 @@ function App() {
         stopRecording,
         pauseRecording,
         error,
-        state, seconds, audio
-    } = useRecordAudio({});
+        state,
+        seconds,
+        audio
+    } = useRecordAudio({onStopRecording});
 
     const {words, text} = useTextSelection();
 
-    const {suggestions, error: e, loading, setSuggestions} = useRewrite({text, intent: "general"});
+    const {suggestions, loading, setSuggestions} = useRewrite({text, intent: "general"});
     const [showSuggestions, setShowSuggestions] = useState(false);
 
     const handleClickAway = () => {
         setShowSuggestions(false);
-        setSuggestions();
+        setSuggestions([]);
     }
 
     useEffect(() => {
@@ -72,37 +84,33 @@ function App() {
                         <AlertTitle>{error}</AlertTitle>
                     </Alert>
                 )}
-                {e && e.message && (
-                    <Alert severity="error">
-                        <AlertTitle>{e.message}</AlertTitle>
-                    </Alert>
-                )}
-
                 <Box>
+                    <Stack direction="column" spacing={4}>
+                        {src && (
+                            <CardMedia controls={!!src} component="audio" src={src}/>
+                        )}
 
-                    {src && (
-                        <CardMedia controls={!!src} component="audio" src={src}/>
-                    )}
+                        {src && state === 'inactive' && <AudioProgress totalSeconds={totalSeconds}/>}
 
+                        <Button>{formatTime(parseInt(`${seconds / 60}`))} {' : '}
+                            {formatTime(parseInt(`${seconds % 60}`))}
+                        </Button>
 
-                    <Button>{formatTime(parseInt(`${seconds / 60}`))} :
-                        {formatTime(parseInt(`${seconds % 60}`))}
-                    </Button>
+                        <Stack direction="column" spacing={2} alignItems="center">
+                            {state === "inactive" ? (
+                                <Box>
+                                    <Button onClick={() => startRecording()}>Start Recording</Button>
+                                </Box>
+                            ) : state === "recording" ? (
+                                <Box>
+                                    <Button onClick={() => pauseRecording()}>Pause Recording</Button>
+                                    <Button onClick={() => stopRecording()}>Stop Recording</Button>
+                                </Box>
+                            ) : state === "paused" ? (
+                                <Button onClick={() => resumeRecording()}>Resume Recording</Button>
+                            ) : null}
 
-                    <Stack direction="column" spacing={2} alignItems="center">
-                        {state === "inactive" ? (
-                            <Box>
-                                <Button onClick={() => startRecording()}>Start Recording</Button>
-                            </Box>
-                        ) : state === "recording" ? (
-                            <Box>
-                                <Button onClick={() => pauseRecording()}>Pause Recording</Button>
-                                <Button onClick={() => stopRecording()}>Stop Recording</Button>
-                            </Box>
-                        ) : state === "paused" ? (
-                            <Button onClick={() => resumeRecording()}>Resume Recording</Button>
-                        ) : null}
-
+                        </Stack>
                     </Stack>
                 </Box>
 
