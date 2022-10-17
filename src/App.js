@@ -104,7 +104,7 @@ function App() {
                 </Box>
 
 
-                <Box sx={{position: "relative", width: '40%', display: suggestions && showSuggestions ? "block" : "none",}}>
+                <Box sx={{position: "relative", width: {lg: '40%', xs: '100%'}}}>
                     <ClickAwayListener onClickAway={handleClickAway}>
                         <Card
                             variant="outlined"
@@ -115,7 +115,8 @@ function App() {
                                 top: '50%',
                                 backgroundColor: "rgba(0, 0, 0, 0.4)",
                                 transform: "translate(-50%, 10%)",
-                                zIndex: -1000
+                                zIndex: -1000,
+                                display: suggestions && showSuggestions ? "block" : "none",
                             }}>
                             <CardContent>
                                 {suggestions && showSuggestions && (
