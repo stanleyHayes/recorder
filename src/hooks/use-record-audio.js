@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useState} from "react";
+import {useCallback, useEffect, useRef, useState} from "react";
 
 const useRecordAudio = ({
                             onStartRecording,
@@ -12,13 +12,22 @@ const useRecordAudio = ({
     const [error, setError] = useState("");
     const [isSupported, setIsSupported] = useState(false);
     const [mediaRecorder, setMediaRecorder] = useState(null);
-    const [chunks, setChunks] = useState([]);
+    const [chunks] = useState([]);
     const [connecting, setConnecting] = useState(false);
     const [state, setState] = useState("inactive");
+    const [audio, setAudio] = useState(null);
+    const [seconds, setSeconds] = useState(0);
+    let intervalRef = useRef(null);
 
     useEffect(() => {
-        console.log(state);
-    }, [state]);
+        intervalRef.current = setInterval(() => {
+            setSeconds((seconds) => seconds + 1);
+        }, 1000);
+
+        return () => {
+            clearInterval(intervalRef.current);
+        }
+    }, [mediaRecorder]);
 
     const startRecording = useCallback(() => {
         if (mediaRecorder) {
@@ -77,7 +86,7 @@ const useRecordAudio = ({
             });
         }
 
-        if(mediaRecorder) {
+        if (mediaRecorder) {
             return () => {
                 mediaRecorder.removeEventListener("resume", () => {
 
@@ -88,14 +97,15 @@ const useRecordAudio = ({
 
     useEffect(() => {
         if (mediaRecorder) {
-            mediaRecorder.addEventListener("stop", () => {
+            mediaRecorder.addEventListener("stop", (event) => {
                 setState(mediaRecorder?.state);
-                const blob = new Blob(chunks, {type: "audio/mp4"});
+                const blob = new Blob(chunks, {type: "audio/wav"});
                 const audioURL = URL.createObjectURL(blob);
                 setSrc(audioURL);
+                setAudio(blob)
             });
         }
-        if(mediaRecorder) {
+        if (mediaRecorder) {
             return () => {
                 mediaRecorder.removeEventListener("stop", () => {
 
@@ -113,7 +123,7 @@ const useRecordAudio = ({
                 }
             });
         }
-        if(mediaRecorder) {
+        if (mediaRecorder) {
             return () => {
                 mediaRecorder.removeEventListener("pause", () => {
 
@@ -150,7 +160,7 @@ const useRecordAudio = ({
                 }
             })
         }
-        if(mediaRecorder){
+        if (mediaRecorder) {
             return () => {
                 mediaRecorder.removeEventListener("start", () => {
 
@@ -186,12 +196,26 @@ const useRecordAudio = ({
         if (mediaRecorder) {
             setState(mediaRecorder?.state);
             mediaRecorder.addEventListener("dataavailable", (event) => {
-                setChunks(chunks => [...chunks, event.data]);
+                chunks.push(event.data);
+                setAudio(event.data);
+                setSrc(URL.createObjectURL(event.data));
             });
         }
     }, [chunks, mediaRecorder]);
 
-    return {error, isSupported, src, pauseRecording, resumeRecording, stopRecording, startRecording, connecting, state};
+    return {
+        error,
+        isSupported,
+        src,
+        pauseRecording,
+        resumeRecording,
+        stopRecording,
+        startRecording,
+        connecting,
+        state,
+        audio,
+        seconds
+    };
 }
 
 
