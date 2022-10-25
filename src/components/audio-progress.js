@@ -2,10 +2,18 @@ import {Card, CardContent, LinearProgress, Stack, Typography} from "@mui/materia
 import {memo, useCallback, useEffect, useRef, useState} from "react";
 import {CancelOutlined, PauseOutlined, PlayArrowOutlined} from "@mui/icons-material";
 
-const AudioProgress = ({totalSeconds}) => {
+const AudioProgress = ({totalSeconds,  src, audio}) => {
     const [state, setState] = useState('inactive');
     const [seconds, setSeconds] = useState(0);
     const timerRef = useRef(null);
+    const audioRef = useRef(null);
+
+    console.log(audio);
+
+    useEffect(() => {
+         audioRef.current = new Audio();
+        audioRef.current.src = src;
+    }, [src]);
 
     useEffect(() => {
         if (state === 'playing') {
@@ -35,11 +43,22 @@ const AudioProgress = ({totalSeconds}) => {
     const handleClickPlay = () => {
         if(state === 'paused'){
             setState('playing');
+            if(audioRef){
+                audioRef.current.play();
+            }
         }else if(state === 'inactive'){
             setSeconds(0);
             setState('playing');
         }
     }
+
+    const handlePauseClick = () => {
+        setState('paused');
+        if(audioRef){
+            audioRef.current.pause();
+        }
+    }
+
 
     return (
         <Card variant="outlined" sx={{borderRadius: 32, position: "relative"}}>
@@ -50,21 +69,35 @@ const AudioProgress = ({totalSeconds}) => {
                     justifyContent="space-between"
                     alignItems="center">
                     {state === 'playing' ?
-                        <PauseOutlined color="secondary" sx={{cursor: "pointer"}} onClick={() => setState('paused')}/> :
+                        <PauseOutlined color="secondary" sx={{cursor: "pointer"}} onClick={handlePauseClick}/> :
                         <PlayArrowOutlined color="success" sx={{cursor: "pointer"}} onClick={handleClickPlay}/>
                     }
+                    <Stack direction="row" spacing={2} alignItems="center">
+                        <Typography
+                            sx={{color: "text.primary"}}
+                            variant="body2">
+                            {formatTime(parseInt(`${seconds / 60}`))} {' : '}
+                            {formatTime(parseInt(`${seconds % 60}`))}
+                        </Typography>
+                        <Typography
+                            sx={{color: "text.primary"}}
+                            variant="body2">
+                            /
+                        </Typography>
+                        <Typography
+                            sx={{color: "text.primary"}}
+                            variant="body2">
+                            {formatTime(parseInt(`${totalSeconds / 60}`))} {' : '}
+                            {formatTime(parseInt(`${totalSeconds % 60}`))}
+                        </Typography>
+                    </Stack>
+
                     <LinearProgress
                         color="secondary"
                         sx={{flex: 1}}
                         value={parseInt(`${seconds / totalSeconds * 100}`)}
                         variant="determinate"
                     />
-                    <Typography
-                        sx={{color: "secondary.main"}}
-                        variant="body1">
-                        {formatTime(parseInt(`${seconds / 60}`))} {' : '}
-                        {formatTime(parseInt(`${seconds % 60}`))}
-                    </Typography>
 
                     <CancelOutlined color="error" sx={{cursor: "pointer"}} onClick={handleCancelClick}/>
                 </Stack>

@@ -1,15 +1,15 @@
 import {useEffect, useState} from "react";
 
 const useTextSelection = () => {
-    const [text, setText] = useState("");
+    const [highlightedText, setHighlightedText] = useState("");
     const [words, setWords] = useState([]);
 
     useEffect(() => {
         document.addEventListener("selectionchange", () => {
-            const text = document.getSelection().toString();
-            setText(text);
-            if(text){
-                const words = text.split(" ");
+            const highlightedText = document.getSelection().toString();
+            setHighlightedText(highlightedText);
+            if(highlightedText){
+                const words = highlightedText.split(" ");
                 if(words.length > 0){
                     setWords(words);
                 }
@@ -19,12 +19,12 @@ const useTextSelection = () => {
         return () => {
             document.removeEventListener("selectionchange", () => {
                 setWords([]);
-                setText("");
+                setHighlightedText("");
             });
         }
     }, []);
 
-    return {text, words};
+    return {highlightedText, words};
 }
 
 export default useTextSelection;
