@@ -1,18 +1,19 @@
-import {Card, CardContent, LinearProgress, Stack, Typography} from "@mui/material";
+import {Box, Card, CardContent, Stack, Typography} from "@mui/material";
 import {memo, useCallback, useEffect, useRef, useState} from "react";
 import {CancelOutlined, PauseOutlined, PlayArrowOutlined} from "@mui/icons-material";
 
-const AudioProgress = ({totalSeconds,  src, audio}) => {
+const AudioProgress = ({totalSeconds, src, audio}) => {
     const [state, setState] = useState('inactive');
     const [seconds, setSeconds] = useState(0);
     const timerRef = useRef(null);
     const audioRef = useRef(null);
 
-    console.log(audio);
+    // console.log(audio);
 
     useEffect(() => {
-         audioRef.current = new Audio();
+        audioRef.current = new Audio();
         audioRef.current.src = src;
+        console.log(audioRef.current)
     }, [src]);
 
     useEffect(() => {
@@ -41,27 +42,55 @@ const AudioProgress = ({totalSeconds,  src, audio}) => {
     }, []);
 
     const handleClickPlay = () => {
-        if(state === 'paused'){
+        console.log('play button clicked');
+        if (state === 'paused') {
+            console.log('state is paused and now playing')
             setState('playing');
-            if(audioRef){
-                audioRef.current.play();
+            if (audioRef) {
+                audioRef.current.play().then(() => {
+                    console.log('playing')
+                });
             }
-        }else if(state === 'inactive'){
+        } else if (state === 'inactive') {
             setSeconds(0);
             setState('playing');
+            if (audioRef) {
+                audioRef.current.play().then(() => {
+                    console.log('playing')
+                })
+            }
+            console.log('state paused and now playing')
+        } else {
+            console.log('else running');
         }
     }
 
     const handlePauseClick = () => {
         setState('paused');
-        if(audioRef){
+        if (audioRef) {
             audioRef.current.pause();
         }
     }
 
 
     return (
-        <Card variant="outlined" sx={{borderRadius: 32, position: "relative"}}>
+        <Card
+            variant="outlined"
+            sx={{
+                borderRadius: 32,
+                position: "relative",
+                "&:after": {
+                    content: "\"\"",
+                    position: "absolute",
+                    top: 0,
+                    bottom: 0,
+                    height: "100%",
+                    width: `${parseInt(`${seconds / totalSeconds * 100}`)}%`,
+                    backgroundColor: "#00B267",
+                    backgroundBlendMode: "multiply"
+                    // transition: `width ${totalSeconds}s linear`
+                }
+            }}>
             <CardContent>
                 <Stack
                     spacing={2}
@@ -72,33 +101,23 @@ const AudioProgress = ({totalSeconds,  src, audio}) => {
                         <PauseOutlined color="secondary" sx={{cursor: "pointer"}} onClick={handlePauseClick}/> :
                         <PlayArrowOutlined color="success" sx={{cursor: "pointer"}} onClick={handleClickPlay}/>
                     }
-                    <Stack direction="row" spacing={2} alignItems="center">
+                    <Stack direction="row" spacing={2} alignItems="center" justifyContent="center">
                         <Typography
-                            sx={{color: "text.primary"}}
+                            sx={{color: seconds < totalSeconds / 2 ? "text.primary" : "white"}}
                             variant="body2">
-                            {formatTime(parseInt(`${seconds / 60}`))} {' : '}
-                            {formatTime(parseInt(`${seconds % 60}`))}
+                            {formatTime(parseInt(`${seconds / 60}`))}
                         </Typography>
                         <Typography
                             sx={{color: "text.primary"}}
                             variant="body2">
-                            /
+                            :
                         </Typography>
                         <Typography
-                            sx={{color: "text.primary"}}
+                            sx={{color: seconds > totalSeconds / 2 ? "white" : "text.primary"}}
                             variant="body2">
-                            {formatTime(parseInt(`${totalSeconds / 60}`))} {' : '}
                             {formatTime(parseInt(`${totalSeconds % 60}`))}
                         </Typography>
                     </Stack>
-
-                    <LinearProgress
-                        color="secondary"
-                        sx={{flex: 1}}
-                        value={parseInt(`${seconds / totalSeconds * 100}`)}
-                        variant="determinate"
-                    />
-
                     <CancelOutlined color="error" sx={{cursor: "pointer"}} onClick={handleCancelClick}/>
                 </Stack>
             </CardContent>
