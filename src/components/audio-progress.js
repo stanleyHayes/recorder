@@ -123,7 +123,7 @@ const AudioProgress = ({totalSeconds, src, audio}) => {
                             onClick={handleClickPlay}
                         />
                     }
-                    <Stack sx={{position: "absolute", left: "50%"}} direction="row" spacing={2} alignItems="center"
+                    <Stack sx={{position: "absolute", left: {xs: "30%", lg: "45%"}}} direction="row" spacing={2} alignItems="center"
                            justifyContent="center">
                         <Typography
                             sx={{
