@@ -90,13 +90,15 @@ function App() {
                 )}
                 <Box>
                     <Stack direction="column" spacing={4}>
-                        {src && (
-                            <CardMedia controls={!!src} component="audio" src={src}/>
-                        )}
+                        {/*{src && (*/}
+                        {/*    <CardMedia controls={!!src} component="audio" src={src}/>*/}
+                        {/*)}*/}
 
                         {src && state === 'inactive' && <AudioProgress audio={audio} src={src} totalSeconds={totalSeconds}/>}
 
-                        <Button>{formatTime(parseInt(`${seconds / 60}`))} {' : '}
+                        <Button>
+                            {formatTime(parseInt(`${seconds / 60}`))}
+                            {' : '}
                             {formatTime(parseInt(`${seconds % 60}`))}
                         </Button>
 

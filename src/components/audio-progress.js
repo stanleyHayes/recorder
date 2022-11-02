@@ -1,6 +1,6 @@
-import {Box, Card, CardContent, Stack, Typography} from "@mui/material";
+import {Card, CardContent, Stack, Typography} from "@mui/material";
 import {memo, useCallback, useEffect, useRef, useState} from "react";
-import {CancelOutlined, PauseOutlined, PlayArrowOutlined} from "@mui/icons-material";
+import {Close, PauseOutlined, PlayArrowOutlined} from "@mui/icons-material";
 
 const AudioProgress = ({totalSeconds, src, audio}) => {
     const [state, setState] = useState('inactive');
@@ -10,10 +10,11 @@ const AudioProgress = ({totalSeconds, src, audio}) => {
 
     // console.log(audio);
 
+    console.log(totalSeconds)
+
     useEffect(() => {
         audioRef.current = new Audio();
         audioRef.current.src = src;
-        console.log(audioRef.current)
     }, [src]);
 
     useEffect(() => {
@@ -72,6 +73,7 @@ const AudioProgress = ({totalSeconds, src, audio}) => {
         }
     }
 
+    console.log(seconds / totalSeconds * 100, 'seconds / totalSeconds * 100')
 
     return (
         <Card
@@ -79,6 +81,7 @@ const AudioProgress = ({totalSeconds, src, audio}) => {
             sx={{
                 borderRadius: 32,
                 position: "relative",
+                pt: 1,
                 "&:after": {
                     content: "\"\"",
                     position: "absolute",
@@ -87,38 +90,76 @@ const AudioProgress = ({totalSeconds, src, audio}) => {
                     height: "100%",
                     width: `${parseInt(`${seconds / totalSeconds * 100}`)}%`,
                     backgroundColor: "#00B267",
-                    backgroundBlendMode: "multiply"
-                    // transition: `width ${totalSeconds}s linear`
+                    transition: `width ${totalSeconds}ms linear`
                 }
             }}>
             <CardContent>
                 <Stack
+                    sx={{position: "relative"}}
                     spacing={2}
                     direction="row"
                     justifyContent="space-between"
                     alignItems="center">
                     {state === 'playing' ?
-                        <PauseOutlined color="secondary" sx={{cursor: "pointer"}} onClick={handlePauseClick}/> :
-                        <PlayArrowOutlined color="success" sx={{cursor: "pointer"}} onClick={handleClickPlay}/>
+                        <PauseOutlined
+                            color="secondary"
+                            sx={{
+                                cursor: "pointer",
+                                zIndex: 1000,
+                                position: "absolute",
+                                left: 0,
+                                color: seconds / totalSeconds * 100 < 10 ? "#000000" : "#FFFFFF"
+                            }}
+                            onClick={handlePauseClick}/> :
+                        <PlayArrowOutlined
+                            color="success"
+                            sx={{
+                                cursor: "pointer",
+                                zIndex: 1000,
+                                position: "absolute",
+                                left: 0,
+                                color: seconds / totalSeconds * 100 < 10 ? "#000000" : "#FFFFFF"
+                            }}
+                            onClick={handleClickPlay}
+                        />
                     }
-                    <Stack direction="row" spacing={2} alignItems="center" justifyContent="center">
+                    <Stack sx={{position: "absolute", left: "50%"}} direction="row" spacing={2} alignItems="center"
+                           justifyContent="center">
                         <Typography
-                            sx={{color: seconds < totalSeconds / 2 ? "text.primary" : "white"}}
+                            sx={{
+                                color: seconds / totalSeconds * 100 < 30 ? "#000000" : "#FFFFFF",
+                                zIndex: 1000
+                            }}
                             variant="body2">
-                            {formatTime(parseInt(`${seconds / 60}`))}
+                            {formatTime(parseInt(`${seconds % 60}`))}
                         </Typography>
                         <Typography
-                            sx={{color: "text.primary"}}
+                            sx={{
+                                zIndex: 1000,
+                                color: seconds / totalSeconds * 100 < 40 ? "#000000" : "#FFFFFF",
+                            }}
                             variant="body2">
                             :
                         </Typography>
                         <Typography
-                            sx={{color: seconds > totalSeconds / 2 ? "white" : "text.primary"}}
+                            sx={{
+                                color: seconds / totalSeconds * 100 < 60 ? "#000000" : "#FFFFFF",
+                                zIndex: 1000
+                            }}
                             variant="body2">
-                            {formatTime(parseInt(`${totalSeconds % 60}`))}
+                            {formatTime(parseInt(`${totalSeconds < 10 ? `0${totalSeconds}` : totalSeconds}`))}
                         </Typography>
                     </Stack>
-                    <CancelOutlined color="error" sx={{cursor: "pointer"}} onClick={handleCancelClick}/>
+                    <Close
+                        sx={{
+                            cursor: "pointer",
+                            zIndex: 1000,
+                            position: "absolute",
+                            right: 0,
+                            color: seconds / totalSeconds * 100 < 90 ? "#000000" : "#FFFFFF",
+                        }}
+                        onClick={handleCancelClick}
+                    />
                 </Stack>
             </CardContent>
         </Card>
